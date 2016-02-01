@@ -65,11 +65,6 @@ public class GUI implements ActionListener, MouseListener {
 		sa_presidentnames = presidentnames.clone();
 		sa_partynames = partynames.clone();
 
-		selectedPresident = -1;
-		selectedEmblem = -1;
-		selectedFlag = -1;
-		selectedPartiesCounter = 0;
-
 		img_empty_president = new ImageIcon(emty_president.getImage());
 		img_empty_party = new ImageIcon(empty_party.getImage());
 		img_empty_emblem = new ImageIcon(empty_emblem.getImage());
@@ -79,15 +74,25 @@ public class GUI implements ActionListener, MouseListener {
 		iia_partyimages = partyimages.clone();
 		iia_emblemimages = emblemimages.clone();
 		iia_flagimages = flagimages.clone();
-
-		il_president = new JLabel[presidentimages.length];
-		il_party = new JLabel[partyimages.length];
-		il_emblem = new JLabel[emblemimages.length];
-		il_flag = new JLabel[flagimages.length];
-
+		
+		init();
+	}
+	
+	void reload() {
+		
+		selectedPresident = -1;
+		selectedEmblem = -1;
+		selectedFlag = -1;
+		selectedPartiesCounter = 0;
+		
+		il_president = new JLabel[iia_presidentimages.length];
+		il_party = new JLabel[iia_presidentimages.length];
+		il_emblem = new JLabel[iia_presidentimages.length];
+		il_flag = new JLabel[iia_presidentimages.length];
+		
 		SelectedParties[0] = -1;
 		SelectedParties[1] = -1;
-
+		
 		boo_presidentBorder = new boolean[iia_presidentimages.length];
 		for (int i = 0; i > iia_presidentimages.length; i++) {
 			boo_presidentBorder[i] = false;
@@ -104,15 +109,13 @@ public class GUI implements ActionListener, MouseListener {
 		for (int i = 0; i > iia_flagimages.length; i++) {
 			boo_flagBorder[i] = false;
 		}
-
-		init();
+		
 		init_pnl_president(presidentimages, presidentnames);
 		init_pnl_party(partyimages, partynames);
 		init_pnl_emblem(emblemimages);
 		init_pnl_flag(flagimages);
 		init_pnl_evaluation();
 		init_panel();
-
 	}
 
 	private void init_panel() {
@@ -132,6 +135,7 @@ public class GUI implements ActionListener, MouseListener {
 	}
 
 	private void init() {
+		
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
@@ -186,7 +190,6 @@ public class GUI implements ActionListener, MouseListener {
 		addComponent(pnl_north, gridbaglayout, lbl_subheader, 0, 1, 1, 1, 0, 0, new Insets(0, 0, 0, 0));
 
 		frame.add(pnl_north, BorderLayout.NORTH);
-
 	}
 
 	private void init_pnl_president(ImageIcon[] presidentimages, String[] presidentname) {
@@ -376,8 +379,7 @@ public class GUI implements ActionListener, MouseListener {
 		frame = null;
 		System.gc();
 
-		new GUI(sa_presidentnames, iia_presidentimages, sa_partynames, iia_partyimages, iia_emblemimages,
-				iia_flagimages, img_empty_president, img_empty_party, img_empty_emblem, img_empty_flag);
+		reload();
 
 		pnl_north.setVisible(false);
 		frame.repaint();
