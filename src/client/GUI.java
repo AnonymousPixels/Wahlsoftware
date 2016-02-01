@@ -76,6 +76,12 @@ public class GUI implements ActionListener, MouseListener {
 		iia_flagimages = flagimages.clone();
 		
 		init();
+		init_pnl_president(presidentimages, presidentnames);
+		init_pnl_party(partyimages, partynames);
+		init_pnl_emblem(emblemimages);
+		init_pnl_flag(flagimages);
+		init_pnl_evaluation();
+		init_panel();
 	}
 	
 	void reload() {
@@ -109,13 +115,6 @@ public class GUI implements ActionListener, MouseListener {
 		for (int i = 0; i > iia_flagimages.length; i++) {
 			boo_flagBorder[i] = false;
 		}
-		
-		init_pnl_president(presidentimages, presidentnames);
-		init_pnl_party(partyimages, partynames);
-		init_pnl_emblem(emblemimages);
-		init_pnl_flag(flagimages);
-		init_pnl_evaluation();
-		init_panel();
 	}
 
 	private void init_panel() {
