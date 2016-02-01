@@ -29,6 +29,8 @@ import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 
+import com.sun.org.apache.bcel.internal.generic.IALOAD;
+
 /*
  * @author Johannes Groß
  * @date 29.01.2016 16:35:59
@@ -44,7 +46,7 @@ public class GUI implements ActionListener, MouseListener {
 	private static GridBagLayout gridbaglayout = new GridBagLayout();
 	private static JScrollPane sp_president, sp_party, sp_emblem, sp_flag, sp_evaluation;
 	private int width;
-	private static Border border;
+	private static Border border, emptyBorder;
 	private static boolean[] boo_presidentBorder, boo_partyBorder, boo_emblemBoder, boo_flagBorder;
 	private static JLabel[] il_president, il_party, il_emblem, il_flag;
 	private static int selectedPresident, selectedEmblem, selectedFlag, selectedPartiesCounter;
@@ -57,18 +59,21 @@ public class GUI implements ActionListener, MouseListener {
 
 	private static String[] sa_presidentnames, sa_partynames;
 	private static ImageIcon[] iia_presidentimages, iia_partyimages, iia_emblemimages, iia_flagimages;
-
+	
 	public GUI(String[] presidentnames, ImageIcon[] presidentimages, String[] partynames, ImageIcon[] partyimages,
 			ImageIcon[] emblemimages, ImageIcon[] flagimages, ImageIcon emty_president, ImageIcon empty_party,
 			ImageIcon empty_emblem, ImageIcon empty_flag) {
-
-		sa_presidentnames = presidentnames.clone();
-		sa_partynames = partynames.clone();
 
 		selectedPresident = -1;
 		selectedEmblem = -1;
 		selectedFlag = -1;
 		selectedPartiesCounter = 0;
+		
+		SelectedParties[0] = -1;
+		SelectedParties[1] = -1;
+		
+		sa_presidentnames = presidentnames.clone();
+		sa_partynames = partynames.clone();
 
 		img_empty_president = new ImageIcon(emty_president.getImage());
 		img_empty_party = new ImageIcon(empty_party.getImage());
@@ -84,9 +89,6 @@ public class GUI implements ActionListener, MouseListener {
 		il_party = new JLabel[partyimages.length];
 		il_emblem = new JLabel[emblemimages.length];
 		il_flag = new JLabel[flagimages.length];
-
-		SelectedParties[0] = -1;
-		SelectedParties[1] = -1;
 
 		boo_presidentBorder = new boolean[iia_presidentimages.length];
 		for (int i = 0; i > iia_presidentimages.length; i++) {
@@ -104,15 +106,49 @@ public class GUI implements ActionListener, MouseListener {
 		for (int i = 0; i > iia_flagimages.length; i++) {
 			boo_flagBorder[i] = false;
 		}
-
+		
+		emptyBorder = BorderFactory.createLineBorder(new Color(240, 240, 240), 10);
+		
 		init();
-		init_pnl_president(presidentimages, presidentnames);
-		init_pnl_party(partyimages, partynames);
-		init_pnl_emblem(emblemimages);
-		init_pnl_flag(flagimages);
+		
+		start();
+	}
+	
+	void start() {
+		
+		init_pnl_president(iia_presidentimages, sa_presidentnames);
+		init_pnl_party(iia_partyimages, sa_partynames);
+		init_pnl_emblem(iia_emblemimages);
+		init_pnl_flag(iia_flagimages);
 		init_pnl_evaluation();
 		init_panel();
-
+		
+		pnl_north.setVisible(false);
+		
+		selectedPresident = -1;
+		selectedEmblem = -1;
+		selectedFlag = -1;
+		selectedPartiesCounter = 0;
+		
+		SelectedParties[0] = -1;
+		SelectedParties[1] = -1;
+		
+		boo_presidentBorder = new boolean[iia_presidentimages.length];
+		for (int i = 0; i > iia_presidentimages.length; i++) {
+			boo_presidentBorder[i] = false;
+		}
+		boo_partyBorder = new boolean[iia_partyimages.length];
+		for (int i = 0; i > iia_partyimages.length; i++) {
+			boo_partyBorder[i] = false;
+		}
+		boo_emblemBoder = new boolean[iia_emblemimages.length];
+		for (int i = 0; i > iia_emblemimages.length; i++) {
+			boo_emblemBoder[i] = false;
+		}
+		boo_flagBorder = new boolean[iia_flagimages.length];
+		for (int i = 0; i > iia_flagimages.length; i++) {
+			boo_flagBorder[i] = false;
+		}
 	}
 
 	private void init_panel() {
@@ -190,11 +226,15 @@ public class GUI implements ActionListener, MouseListener {
 	}
 
 	private void init_pnl_president(ImageIcon[] presidentimages, String[] presidentname) {
+		
 		int add = 0;
-		if (presidentimages.length % 4 != 0) {
-			add = 4 - presidentimages.length % 4;
-		}
-		GridLayout gridlayout = new GridLayout((presidentimages.length / 4) + add, 4);
+		if(presidentimages.length % 3 == 0)
+			add = presidentimages.length / 3;
+		else
+			add = (int) (presidentimages.length / 3) + 1;
+		System.out.println("add: " + add);
+		
+		GridLayout gridlayout = new GridLayout(add, 3);
 		ip_president = new JPanel[presidentimages.length];
 
 		pnl_president = new JPanel();
@@ -211,7 +251,7 @@ public class GUI implements ActionListener, MouseListener {
 
 			ip_president[i].setSize((width * 9) / 4, (int) ((width * 0.9)));
 
-			il_president[i].setBorder(BorderFactory.createEmptyBorder());
+			il_president[i].setBorder(emptyBorder);
 			addComponent(ip_president[i], gridbaglayout, il_president[i], 0, 0, 1, 1, 1, 1, new Insets(10, 10, 10, 10));
 			pnl_president.add(ip_president[i]);
 		}
@@ -221,10 +261,13 @@ public class GUI implements ActionListener, MouseListener {
 	private void init_pnl_party(ImageIcon[] partyimages, String[] partynames) {
 
 		int add = 0;
-		if (partyimages.length % 4 != 0) {
-			add = 4 - partyimages.length % 4;
-		}
-		GridLayout gridlayout = new GridLayout((partyimages.length / 4) + add, 4);
+		if(partyimages.length % 3 == 0)
+			add = partyimages.length / 3;
+		else
+			add = (int) (partyimages.length / 3) + 1;
+		System.out.println("add: " + add);
+		
+		GridLayout gridlayout = new GridLayout(add, 3);
 		ip_party = new JPanel[partyimages.length];
 		pnl_party = new JPanel();
 		pnl_party.setLayout(gridlayout);
@@ -239,7 +282,7 @@ public class GUI implements ActionListener, MouseListener {
 					(int) (width * 0.9) / 4, Image.SCALE_FAST)));
 			ip_party[i].setSize((width * 9) / 4, (int) ((width * 0.9)));
 
-			il_party[i].setBorder(BorderFactory.createEmptyBorder());
+			il_party[i].setBorder(emptyBorder);
 			addComponent(ip_party[i], gridbaglayout, il_party[i], 0, 0, 1, 1, 1, 1, new Insets(10, 10, 10, 10));
 
 			pnl_party.add(ip_party[i]);
@@ -251,11 +294,15 @@ public class GUI implements ActionListener, MouseListener {
 	}
 
 	private void init_pnl_emblem(ImageIcon[] emblemimages) {
+
 		int add = 0;
-		if (emblemimages.length % 4 != 0) {
-			add = 4 - emblemimages.length % 4;
-		}
-		GridLayout gridlayout = new GridLayout((emblemimages.length / 4) + add, 4);
+		if(emblemimages.length % 3 == 0)
+			add = emblemimages.length / 3;
+		else
+			add = (int) (emblemimages.length / 3) + 1;
+		System.out.println("add: " + add);
+		
+		GridLayout gridlayout = new GridLayout(add, 3);
 		ip_emblem = new JPanel[emblemimages.length];
 		pnl_emblem = new JPanel();
 		pnl_emblem.setLayout(gridlayout);
@@ -270,7 +317,7 @@ public class GUI implements ActionListener, MouseListener {
 					.getScaledInstance((int) (width * 0.9) / 4, (int) (width * 0.9) / 4, Image.SCALE_FAST)));
 			ip_emblem[i].setSize((width * 9) / 4, (int) ((width * 0.9)));
 
-			il_emblem[i].setBorder(BorderFactory.createEmptyBorder());
+			il_emblem[i].setBorder(emptyBorder);
 			addComponent(ip_emblem[i], gridbaglayout, il_emblem[i], 0, 0, 1, 1, 1, 1, new Insets(10, 10, 10, 10));
 
 			pnl_emblem.add(ip_emblem[i]);
@@ -283,11 +330,15 @@ public class GUI implements ActionListener, MouseListener {
 	}
 
 	private void init_pnl_flag(ImageIcon[] flagimages) {
+
 		int add = 0;
-		if (flagimages.length % 4 != 0) {
-			add = 4 - flagimages.length % 4;
-		}
-		GridLayout gridlayout = new GridLayout((flagimages.length / 4) + add, 4);
+		if(flagimages.length % 3 == 0)
+			add = flagimages.length / 3;
+		else
+			add = (int) (flagimages.length / 3) + 1;
+		System.out.println("add: " + add);
+		
+		GridLayout gridlayout = new GridLayout(add, 3);
 
 		ip_flag = new JPanel[flagimages.length];
 
@@ -304,7 +355,7 @@ public class GUI implements ActionListener, MouseListener {
 					(int) (width * 0.9) / 4, Image.SCALE_FAST)));
 			ip_flag[i].setSize((width * 9) / 4, (int) ((width * 0.9)));
 
-			il_flag[i].setBorder(BorderFactory.createEmptyBorder());
+			il_flag[i].setBorder(emptyBorder);
 			addComponent(ip_flag[i], gridbaglayout, il_flag[i], 0, 0, 1, 1, 1, 1, new Insets(10, 10, 10, 10));
 			pnl_flag.add(ip_flag[i]);
 		}
@@ -316,7 +367,7 @@ public class GUI implements ActionListener, MouseListener {
 
 	private void init_pnl_evaluation() {
 
-		GridLayout gridlayout = new GridLayout(2, 4);
+		GridLayout gridlayout = new GridLayout(2, 3);
 		pnl_evaluation = new JPanel();
 		pnl_evaluation.setLayout(gridlayout);
 		pnl_evaluation.setVisible(false);
@@ -358,8 +409,9 @@ public class GUI implements ActionListener, MouseListener {
 		panel.setVisible(false);
 		frame.repaint();
 		btn_next.setEnabled(true);
+		pnl_north.setVisible(false);
 
-		lbl_wait.setText("Wahl abgeschlossen, verlassen sie nun bitte den Raum.");
+//		lbl_wait.setText("Wahl abgeschlossen, verlassen sie nun bitte den Raum.");
 		lbl_wait.setVisible(true);
 		frame.add(lbl_wait);
 
@@ -368,55 +420,43 @@ public class GUI implements ActionListener, MouseListener {
 
 	private void reOpen() throws InterruptedException {
 
-		Thread.sleep(5000);
-		
 		Client.SendData(selectedPresident, SelectedParties[0], SelectedParties[1], selectedEmblem, selectedFlag);
 
-		frame.dispose();
-		frame = null;
-		System.gc();
-
-		new GUI(sa_presidentnames, iia_presidentimages, sa_partynames, iia_partyimages, iia_emblemimages,
-				iia_flagimages, img_empty_president, img_empty_party, img_empty_emblem, img_empty_flag);
-
-		pnl_north.setVisible(false);
-		frame.repaint();
-
-
+		start();
 	}
 
 	private void addEvaluationSelection() {
 		pnl_evaluation.removeAll();
 		// TODO Bilder
-		ev_emblem = new JLabel("Wappen nicht gewählt");
+		ev_emblem = new JLabel("Wappen nicht gewählt", SwingConstants.CENTER);
 		ev_emblem.setText("");
 		ev_emblem.setIcon(new ImageIcon(img_empty_emblem.getImage().getScaledInstance((int) (width * 0.9) / 4,
 				(int) (width * 0.9) / 4, Image.SCALE_FAST)));
 		ev_emblem.setSize((width * 9) / 4, (int) ((width * 0.9)));
 		ev_emblem.addMouseListener(this);
 
-		ev_flag = new JLabel("Flagge nicht gewählt");
+		ev_flag = new JLabel("Flagge nicht gewählt", SwingConstants.CENTER);
 		ev_flag.setText("");
 		ev_flag.setIcon(new ImageIcon(img_empty_flag.getImage().getScaledInstance((int) (width * 0.9) / 4,
 				(int) (width * 0.9) / 4, Image.SCALE_FAST)));
 		ev_flag.setSize((width * 9) / 4, (int) ((width * 0.9)));
 		ev_flag.addMouseListener(this);
 
-		ev_party1 = new JLabel("Partei nicht gewählt");
+		ev_party1 = new JLabel("Partei nicht gewählt", SwingConstants.CENTER);
 		ev_party1.setText("");
 		ev_party1.setIcon(new ImageIcon(img_empty_party.getImage().getScaledInstance((int) (width * 0.9) / 4,
 				(int) (width * 0.9) / 4, Image.SCALE_FAST)));
 		ev_party1.setSize((width * 9) / 4, (int) ((width * 0.9)));
 		ev_party1.addMouseListener(this);
 
-		ev_president = new JLabel("Präsident nicht gewählt");
+		ev_president = new JLabel("Präsident nicht gewählt", SwingConstants.CENTER);
 		ev_president.setText("");
 		ev_president.setIcon(new ImageIcon(img_empty_president.getImage().getScaledInstance((int) (width * 0.9) / 4,
 				(int) (width * 0.9) / 4, Image.SCALE_FAST)));
 		ev_president.setSize((width * 9) / 4, (int) ((width * 0.9)));
 		ev_president.addMouseListener(this);
 
-		ev_party2 = new JLabel("Partei nicht gewählt");
+		ev_party2 = new JLabel("Partei nicht gewählt", SwingConstants.CENTER);
 		ev_party2.setText("");
 		ev_party2.setIcon(new ImageIcon(img_empty_party.getImage().getScaledInstance((int) (width * 0.9) / 4,
 				(int) (width * 0.9) / 4, Image.SCALE_FAST)));
@@ -428,7 +468,7 @@ public class GUI implements ActionListener, MouseListener {
 			if (boo_emblemBoder[i] == true) {
 				ev_emblem = new JLabel(il_emblem[i].getIcon());
 				ev_emblem.addMouseListener(this);
-				ev_emblem.setBorder(BorderFactory.createEmptyBorder());
+				ev_emblem.setBorder(emptyBorder);
 				ev_emblem.repaint();
 				// pnl_evaluation.add(ev_emblem);
 				break emblem;
@@ -440,7 +480,7 @@ public class GUI implements ActionListener, MouseListener {
 			if (boo_flagBorder[i] == true) {
 				ev_flag = new JLabel(il_flag[i].getIcon());
 				ev_flag.addMouseListener(this);
-				ev_flag.setBorder(BorderFactory.createEmptyBorder());
+				ev_flag.setBorder(emptyBorder);
 				ev_flag.repaint();
 				// pnl_evaluation.add(ev_flag);
 				break flag;
@@ -453,7 +493,7 @@ public class GUI implements ActionListener, MouseListener {
 			if (boo_presidentBorder[i] == true) {
 				ev_president = new JLabel(il_president[i].getIcon());
 				ev_president.addMouseListener(this);
-				ev_president.setBorder(BorderFactory.createEmptyBorder());
+				ev_president.setBorder(emptyBorder);
 				ev_president.repaint();
 				// pnl_evaluation.add(ev_president);
 				break president;
@@ -466,7 +506,7 @@ public class GUI implements ActionListener, MouseListener {
 			if (boo_partyBorder[i] == true && id == 1) {
 				ev_party1 = new JLabel(il_party[i].getIcon());
 				ev_party1.addMouseListener(this);
-				ev_party1.setBorder(BorderFactory.createEmptyBorder());
+				ev_party1.setBorder(emptyBorder);
 				ev_party1.repaint();
 
 				id++;
@@ -474,7 +514,7 @@ public class GUI implements ActionListener, MouseListener {
 
 				ev_party2 = new JLabel(il_party[i].getIcon());
 				ev_party2.addMouseListener(this);
-				ev_party2.setBorder(BorderFactory.createEmptyBorder());
+				ev_party2.setBorder(emptyBorder);
 				ev_party2.repaint();
 
 				// pnl_evaluation.remove(ev_party1);
@@ -607,7 +647,7 @@ public class GUI implements ActionListener, MouseListener {
 
 					if (PresidentIsSelected) {
 						if (selectedPresident != -1) {
-							il_president[selectedPresident].setBorder(BorderFactory.createEmptyBorder());
+							il_president[selectedPresident].setBorder(emptyBorder);
 							boo_presidentBorder[selectedPresident] = false;
 						}
 
@@ -649,7 +689,7 @@ public class GUI implements ActionListener, MouseListener {
 						for (int k = 0; k < ip_party.length; k++) {
 							if (k != i) {
 								boo_partyBorder[k] = false;
-								il_party[k].setBorder(BorderFactory.createEmptyBorder());
+								il_party[k].setBorder(emptyBorder);
 							}
 						}
 						selectedPartiesCounter = 1;
@@ -658,7 +698,7 @@ public class GUI implements ActionListener, MouseListener {
 					} else if (selectedPartiesCounter == 1) {
 
 						if (SelectedParties[0] == i) {
-							il_party[i].setBorder(BorderFactory.createEmptyBorder());
+							il_party[i].setBorder(emptyBorder);
 							boo_partyBorder[i] = false;
 							selectedPartiesCounter--;
 							SelectedParties[0] = -1;
@@ -672,14 +712,14 @@ public class GUI implements ActionListener, MouseListener {
 					} else {
 
 						if (SelectedParties[0] == i) {
-							il_party[i].setBorder(BorderFactory.createEmptyBorder());
+							il_party[i].setBorder(emptyBorder);
 							selectedPartiesCounter--;
 							SelectedParties[0] = SelectedParties[1];
 							boo_partyBorder[i] = false;
 
 							SelectedParties[1] = -1;
 						} else if (SelectedParties[1] == i) {
-							il_party[i].setBorder(BorderFactory.createEmptyBorder());
+							il_party[i].setBorder(emptyBorder);
 							selectedPartiesCounter--;
 							SelectedParties[1] = -1;
 							boo_partyBorder[i] = false;
@@ -699,7 +739,7 @@ public class GUI implements ActionListener, MouseListener {
 
 					if (EmblemIsSelected) {
 						if (selectedEmblem != -1) {
-							il_emblem[selectedEmblem].setBorder(BorderFactory.createEmptyBorder());
+							il_emblem[selectedEmblem].setBorder(emptyBorder);
 							boo_emblemBoder[selectedEmblem] = false;
 						}
 
@@ -736,7 +776,7 @@ public class GUI implements ActionListener, MouseListener {
 
 					if (FlagIsSelected) {
 						if (selectedFlag != -1) {
-							il_flag[selectedFlag].setBorder(BorderFactory.createEmptyBorder());
+							il_flag[selectedFlag].setBorder(emptyBorder);
 							boo_flagBorder[selectedFlag] = false;
 						}
 

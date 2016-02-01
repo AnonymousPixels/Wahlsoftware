@@ -169,12 +169,13 @@ public class Client {
 		gui = new GUI(president, president_image, party, party_image,
 				emblem_image, flag_image, noPresi, noParty, noEmblem, noFlag);
 		connect();
-
 	}
 
 	private void connect() {
 		try {
+			System.out.println("Connecting...");
 			socket = new Socket(ip, 27016);
+			System.out.println("Connected!");
 			r = new BufferedReader(new InputStreamReader(
 					socket.getInputStream()));
 			send = new DataOutputStream(socket.getOutputStream());
@@ -192,6 +193,7 @@ public class Client {
 		} catch (IOException e) {
 			System.out.println("Could't connect to server");
 			e.printStackTrace();
+			System.exit(1);
 		}
 	}
 
